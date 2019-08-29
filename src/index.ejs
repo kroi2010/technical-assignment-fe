@@ -7,6 +7,38 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-	<h1>you are ready to go! :)</h1>
+	<section id="gameContainer">
+		<section id="preGame">
+			<h1>You can choose weapons to play with:</h1>
+			<section id="allOptions"></section>
+			<p>At least three weapons should be chosen</p>
+			<button id="startGame">Start Game</button>
+		</section>
+		<section id="game">
+				<section id="roundNumberContainer">
+					<div class="round">1<span></span></div>
+					<div class="round">2<span></span></div>
+					<div class="round">3<span></span></div>
+				</section>
+				<h3 class="message">Make your choice:</h3>
+				<section id="choiceList">
+				</section>
+				<section class="playModeContainer">
+					<input type="radio" name="playMode" value="manual" id="manualPlay" checked="checked" ><label for="manualPlay">Manual</label> 
+					<input type="radio" name="playMode" value="auto" id="autoPlay"><label for="autoPlay">Auto</label> 
+				</section>
+		</section>
+		<section id="roundContainer">
+			<div id="roundText">
+				<p id="roundNumber"></p>
+				<p>round</p>
+			</div>
+		</section>
+		<section id="winAnimationContainer">
+				<h1 id="winHeader"></h1>
+				<p id="winAnimationMsg"></p>
+				<button id="restartGame">Play Again</button>
+			</section>
+	</section>
 </body>
 </html>

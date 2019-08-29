@@ -1,7 +1,251 @@
-body {
-	background-color: green;
+@import url('https://fonts.googleapis.com/css?family=Nunito:600&display=swap');
+@mixin flexBase {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
 
-	h1 {
-		color: white;
+@mixin verticalFlex {
+	@include flexBase;
+	flex-direction: column;
+}
+
+@mixin horizontalFlex {
+	@include flexBase;
+	flex-direction: row;
+}
+
+body {
+	@include flexBase;
+	background-color: #272727;
+	height: 100vh;
+	font-family: 'Nunito', sans-serif;
+
+	#gameContainer {
+		@include verticalFlex;
+		background-color: #ffffff;
+		border-radius: 5px;
+		max-width: 900px;
+		padding: 20px;
+		width: 80vw;
+		position: relative;
+		overflow: hidden;
+
+		& *{
+			color: #444444;
+		}
+
+		.choice{
+			width: 100px;
+			height: 100px;
+			border-radius: 50%;
+			background: linear-gradient(to bottom, #d6005d, #e77676);
+			box-shadow: inset 0px 20px 20px -10px rgba(0,0,0,0.2), inset 0px 2px 2px 0px rgba(0,0,0,0.2);
+			background-position: 0% 100%;
+			margin: 10px;
+			text-align: center;
+			line-height: 100px;
+			cursor: pointer;
+	
+			&:hover{
+				background-position: 0% 0%;
+				animation: selectedAnimation 0.5s;
+			}
+	
+			&.selected{
+				background: linear-gradient(to bottom, #d6005d, #ffe053);
+				.hand{
+					text-shadow: 0 0 5px #ffffff,0 0 1px #ffffff;
+				}
+			}
+	
+			.hand{
+				color: #ffffff;
+			}
+	
+			&.rock .hand{
+				width: 100px;
+				height: 152px;
+				//background: url("D:/Documents/Programming/React/technical-assignment-fe/src/assets/rock.png") no-repeat;
+				background-size: contain;
+			}
+		}
+
+		#game{
+			display: none;
+			flex-direction: column;
+			flex-grow: 1;
+			justify-content: space-between;
+	
+			.message{
+				margin: 5px 0 auto;
+				text-align: center;
+			}
+	
+			#roundNumberContainer{
+				@include horizontalFlex;
+				margin: 20px 0 40px;
+		
+				.round{
+					width: 30px;
+					height: 30px;
+					border: 3px solid #868686;
+					color: #868686;
+					font-size: 22px;
+					line-height: 32px;
+					margin: 0 10px;
+					border-radius: 50%;
+					text-align: center; 
+					transition: all 0.6s;
+					position: relative;
+
+					span{
+						position: absolute;
+						bottom: -20px;
+						font-size: 18px;
+						line-height: 16px;
+						left: -12px;
+						text-align: center;
+						width: 56px;
+					}
+
+					&.won{
+						border-color: #2abf40;
+						background: #2abf40;
+						color: #ffffff;
+
+						span{
+							color: #2abf40;
+						}
+					}
+
+					&.lost{
+						border-color: #e77676;
+						background: #e77676;
+						color: #ffffff;
+
+						span{
+							color: #e77676;
+						}
+					}
+
+					&.tie{
+						border-color: #fcba03;
+						background: #fcba03;
+						color: #ffffff;
+
+						span{
+							color: #fcba03;
+						}
+					}
+
+				}
+			}
+	
+			#choiceList{
+				@include horizontalFlex;
+			}
+	
+			.playModeContainer{
+				margin-top: 10px;
+				@include horizontalFlex;
+	
+				input{
+					cursor: pointer;
+				}
+				input:nth-of-type(2){
+					margin-left: 20px;
+				}
+				label{
+					cursor: pointer;
+				}
+			}
+		}
+
+		#preGame{
+			@include verticalFlex();
+
+			#allOptions{
+				@include horizontalFlex;
+				flex-wrap: wrap;
+			}
+
+			& *{
+				text-align: center;
+			}
+		}
+
+		#preGame,
+		#winAnimationContainer{
+			button{
+				border-radius: 5px;
+				border: none;
+				font-size: 20px;
+				line-height: 40px;
+				width: 80%;
+				cursor: pointer;
+			}
+		}
+
+		#roundContainer{
+			@include verticalFlex;
+			background: #ffffff;
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right:0;
+			opacity: 0;
+			transition: opacity 0.6s;
+			pointer-events: none;
+
+			#roundText{
+				opacity: 0;
+				transition: opacity 0.6s;
+			}
+			
+			#roundNumber{
+				font-size: 40px;
+				font-size: 75px;
+				line-height: 75px;
+			}
+
+			p{
+				font-size: 25px;
+				margin: 5px 0;
+			}
+		}
+
+		#winAnimationContainer{
+			@include verticalFlex;
+			background: #ffffff;
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right:0;
+			transition: opacity 0.6s;
+			opacity: 0;
+			pointer-events: none;
+			font-size: 22px;
+			padding: 30px;
+			text-align: center;
+
+			h1{
+				color: #2abf40;
+				display: none;
+				font-size: 28px;
+				margin: 5px 0;
+			}
+
+			p{
+				margin: 0 0 30px;
+			}
+		}
 	}
+}
+
+@keyframes selectedAnimation{
+	0% {background-position: 0% 50%;}
+	100% {background-position: 0% 0%;}
 }

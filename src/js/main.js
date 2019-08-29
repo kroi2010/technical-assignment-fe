@@ -1,5 +1,6 @@
 require('../css/main.scss');
+import {initializePreGame} from "./modules/pregame";
 
-import print from './module';
+initializePreGame();
 
-print('it works well!');
+

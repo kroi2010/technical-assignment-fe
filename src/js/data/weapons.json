@@ -1,0 +1,29 @@
+{
+    "weapons":[
+        {
+            "name":"rock",
+            "winAgainst": ["scissors", "lizard"],
+            "active": true
+        },
+        {
+            "name":"paper",
+            "winAgainst": ["rock", "spock"],
+            "active": true
+        },
+        {
+            "name":"scissors",
+            "winAgainst": ["paper", "lizard"],
+            "active": true
+        },
+        {
+            "name":"spock",
+            "winAgainst": ["rock","scissors"],
+            "active": false
+        },
+        {
+            "name":"lizard",
+            "winAgainst": ["spock","paper"],
+            "active": false
+        }
+    ]
+}
