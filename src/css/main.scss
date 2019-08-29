@@ -54,6 +54,7 @@ body {
 	
 			&.selected{
 				background: linear-gradient(to bottom, #d6005d, #ffe053);
+				transition: all 1s;
 				.hand{
 					text-shadow: 0 0 5px #ffffff,0 0 1px #ffffff;
 				}
@@ -62,12 +63,50 @@ body {
 			.hand{
 				color: #ffffff;
 			}
-	
-			&.rock .hand{
-				width: 100px;
-				height: 152px;
-				//background: url("D:/Documents/Programming/React/technical-assignment-fe/src/assets/rock.png") no-repeat;
-				background-size: contain;
+		}
+
+		#computerChoice{
+			background: linear-gradient(to bottom, #122977, #746cc3);
+			cursor: default;
+			position: absolute;
+			top: 0;
+			right: 0;
+			display: none;
+			opacity: 0;
+			@mixin dot{
+				height: 8px;
+				width: 8px;
+				border-radius: 50%;
+				background: #ffffff;
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0; 
+				animation: thinkingAnimation 0.9s cubic-bezier(0.2,.5, 0.8, 3);
+				animation-iteration-count: 2;
+			}
+
+			&.thinking{
+				.hand{
+					@include dot();
+					margin: auto;
+					animation-delay: 1.1s;
+				}
+
+				&::before{
+					content: "";
+					@include dot();
+					margin: auto auto auto 25px;
+					animation-delay: 1s;
+				}
+
+				&::after{
+					content: "";
+					@include dot();
+					margin: auto 25px auto auto;
+					animation-delay: 1.2s;
+				}
 			}
 		}
 
@@ -76,6 +115,7 @@ body {
 			flex-direction: column;
 			flex-grow: 1;
 			justify-content: space-between;
+			width: 90%;
 	
 			.message{
 				margin: 5px 0 auto;
@@ -144,6 +184,7 @@ body {
 	
 			#choiceList{
 				@include horizontalFlex;
+				position: relative;
 			}
 	
 			.playModeContainer{
@@ -248,4 +289,11 @@ body {
 @keyframes selectedAnimation{
 	0% {background-position: 0% 50%;}
 	100% {background-position: 0% 0%;}
+}
+
+@keyframes thinkingAnimation{
+	0%   { transform: translateY(0px); }
+	25%  { transform: translateY(-7px); }
+	50%  { transform: translateY(0px); }
+	100% { transform: translateY(0px); }
 }

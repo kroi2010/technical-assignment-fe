@@ -8,7 +8,9 @@ import {
     clearDOM,
     colorRoundNumber,
     displayRound,
-    renderGameOption} from "./renderUI";
+    renderGameOption,
+    showRoundOutcome
+} from "./renderUI";
 import {strings} from "../constants";
 import{initializeWinAnimation} from "./winAnimation"
 
@@ -34,21 +36,23 @@ const prepareObjects = (activeWeaponObjects) => {
 }
 
 const hideChoices = () => {
-    activeWeaponChoices.forEach(el => {
-        removeClick(el)
-        if(!el.classList.contains("selected")){
-            fadeOut(el);
+    for(let i=0; i<activeWeaponChoices.length;i++){
+        removeClick(activeWeaponChoices[i])
+        if(!activeWeaponChoices[i].classList.contains("selected")){
+            fadeOut(activeWeaponChoices[i]);
         }
-    })
+    }
 }
 
 const randomChoice = () => {
     return Math.floor(Math.random()*activeWeaponChoices.length);
 }
 
-const getResult = (choice) => {
-    let userChoice = activeWeapons.find(obj => obj.name === choice);
+const showResult = (selectedEl) => {
+    let weaponName = [...selectedEl.classList].find(weaponClass => (weaponClass!=="selected" && weaponClass!=="choice"));
+    let userChoice = activeWeapons.find(obj => obj.name === weaponName);
     let computerChoice = activeWeapons[randomChoice()];
+    showRoundOutcome(selectedEl, computerChoice.name);
     let result;
     if(userChoice.winAgainst.includes(computerChoice.name)){
         result = strings.won;
@@ -61,10 +65,11 @@ const getResult = (choice) => {
     colorRoundNumber(roundNumber, result);
 
     roundNumber++;
-
+    /*
     setTimeout(() => {
         playRound();
     }, 6000);
+    */
 }
 
 const autoPlaySelect = () => {
@@ -139,6 +144,12 @@ const initializeGame = (activeWeaponObjects) => {
     playRound();
 }
 
+const userMadeChoice = (el) => {
+    select(el);
+    hideChoices();
+    showResult(el);
+}
+
 const addListeners = () => {
     const radioButton = document.getElementById("autoPlay");
     radioButton.addEventListener("change", () => {
@@ -149,16 +160,7 @@ const addListeners = () => {
 
     activeWeaponChoices.forEach(el => {
         el.addEventListener("click", () => {
-            let classList = el.classList;
-            let userChoice = null;
-            classList.forEach(className => {
-                if(className!=="choice" && className!=="selected"){
-                    userChoice = className;
-                }
-            })
-            select(el);
-            hideChoices();
-            getResult(userChoice);
+            userMadeChoice(el);
         });
     })
 }

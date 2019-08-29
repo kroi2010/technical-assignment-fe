@@ -1,4 +1,14 @@
 
+const delay =  ((time) => { 
+    
+    return new Promise((resolve) => {
+
+        return setTimeout(function(){
+            resolve(true);
+        }, time);  
+    });
+});
+
 const renderGameOption = (option, parrent) => {
     let childElement = document.createElement('div');
     childElement.classList.add("choice");
@@ -13,6 +23,13 @@ const renderGameOption = (option, parrent) => {
 
     return childElement;
 }
+const addCls = (el, cls) => {
+    el.classList.add(cls);
+}
+
+const removeCls = (el, cls) => {
+    el.classList.remove(cls);
+}
 
 const fadeIn = (el) => {
     el.style.opacity = "1";
@@ -23,11 +40,11 @@ const fadeOut = (el) => {
 }
 
 const select = (el) => {
-    el.classList.add("selected");
+    addCls(el, "selected")
 }
 
 const deselect = (el) => {
-    el.classList.remove("selected");
+    removeCls(el, "selected");
 }
 
 const removeClick = (el) => {
@@ -36,6 +53,10 @@ const removeClick = (el) => {
 
 const addClick = (el) => {
     el.style.pointerEvents = "all";
+}
+
+const hide = (el) => {
+    el.style.display = "none";
 }
 
 const clearDOM = (el) => {
@@ -47,7 +68,7 @@ const showPreGameScreen = () => {
     let preGame = document.getElementById("preGame");
     let mainContainer = document.getElementById("gameContainer");
     mainContainer.style.minHeight = preGame.clientHeight.toString()+"px";
-    game.style.display = "none";
+    hide(game);
     preGame.style.display = "flex";
 }
 
@@ -55,7 +76,7 @@ const showGameScreen = () => {
     let game = document.getElementById("game");
     let preGame = document.getElementById("preGame");
     game.style.display = "flex";
-    preGame.style.display = "none";
+    hide(preGame);
 }
 
 const fadeInOut = (el) => {
@@ -123,10 +144,72 @@ const showWinAnimation = (header, msg) => {
 }
 
 const hideWinAnimation = () => {
-    document.getElementById("winHeader").style.display = "none";
+    hide(document.getElementById("winHeader"));
     let winAnimation = document.getElementById("winAnimationContainer");
     fadeOut(winAnimation);
     removeClick(winAnimation);
+}
+
+const startThinking = (el) => {
+    addCls(el, "thinking");
+    let today = new Date();
+    let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    console.log("started thinking: "+time)
+}
+
+const stopThinking = (el) => {
+    removeCls(el, "thinking");
+}
+
+const displayComputerChoice = (el, value) => {
+    el.style.background = "transparent";
+    el.innerHTML = value;
+}
+
+const translateElementAgainst = (el, parent) => {
+    let elementDistance = el.getBoundingClientRect().x;
+    let margin = getComputedStyle(el).marginLeft;
+    let parentDistance = parent.getBoundingClientRect().x;
+    let translateDistance = elementDistance - parentDistance + parseInt(margin, 10);
+
+    el.style.transform = "translateX(-"+translateDistance+"px)";
+}
+
+const showComputerChoice = (value) => {
+    let computerChoice = document.getElementById("computerChoice")
+    computerChoice.style.display = "block";
+
+    fadeIn(computerChoice);
+
+    delay(4000)
+    .then(() => startThinking(computerChoice))
+    .then(() => delay(2000))
+    .then(() => stopThinking(computerChoice))
+    .then(() => displayComputerChoice(computerChoice.firstElementChild, value))
+    .catch((error) => {
+        console.log(error)
+    });
+}
+
+const hideComputerChoice = () => {
+    let computerChoice = document.getElementById("computerChoice")
+    console.log("hide computer choice");
+    hide(computerChoice)
+    fadeOut(computerChoice);
+}
+
+const showRoundOutcome = (selectedElement, computerValue) => {
+    let startOutcomeShowChain = new Promise((resolve) => {
+        translateElementAgainst(selectedElement, document.getElementById("choiceList"));
+        resolve(true);
+    })
+    startOutcomeShowChain
+    //.then(() => translateElementAgainst(selectedElement, document.getElementById("choiceList")))
+    .then(() => showComputerChoice(computerValue))
+    .then(() => hideComputerChoice());
+    // translateElementAgainst(selectedElement, document.getElementById("choiceList"));
+    // showComputerChoice(computerValue);
+    // setTimeout(hideComputerChoice(), 10000);
 }
 
 export {
@@ -144,6 +227,7 @@ export {
     renderGameOption,
     showPreGameScreen,
     showGameScreen,
+    showRoundOutcome,
     showWinAnimation,
     hideWinAnimation
 };
