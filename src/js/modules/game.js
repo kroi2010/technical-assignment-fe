@@ -148,7 +148,6 @@ const startNewRound = () => {
         fadeOutRoundDisplay(resolve);
     }).then(() => {
         autoChoiceMade = false;
-        console.log("adding click")
         addClick(document.getElementById("autoPlay"));
         addClick([...document.getElementById("autoPlay").parentElement.getElementsByTagName("label")].find(l => l.htmlFor==="autoPlay"));
         setTimeout(() => {
@@ -178,8 +177,7 @@ const addListeners = () => {
 
     if(firstInitiation){
         firstInitiation = false;
-        radioButton.addEventListener("change", (e) => {
-            console.log("changed by ",e.target);
+        radioButton.addEventListener("change", () => {
         if(document.getElementById("autoPlay").checked){
             autoChoiceMade = true;
             autoPlaySelect();
@@ -189,7 +187,6 @@ const addListeners = () => {
 
     activeWeaponChoices.forEach(el => {
         el.addEventListener("click", () => {
-            console.log("clicked",el.classList)
             removeClick(radioButton);
             removeClick([...radioButton.parentElement.getElementsByTagName("label")].find(l => l.htmlFor===radioButton.id));
             userMadeChoice(el);

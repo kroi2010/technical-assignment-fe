@@ -8,9 +8,33 @@ import {getRoundNumber, initializeGame} from "./game";
 import WeaponList from "../data/weapons.json";
 import Weapon from "./weapons";
 
+// all weapons that are currently supported by the game
 let allWeapons = [];
+
+// flag to avoid even listener stacking
 let firstInitiation = true;
 
+/**
+ * Import all weapons that are supported 
+ */
+const addAllWeapons = () => {
+    WeaponList.weapons.forEach(element => {
+        allWeapons.push(new Weapon(element.name, element.winAgainst, element.active))
+    });
+
+    let optionsContainer = document.getElementById("allOptions");
+    allWeapons.forEach(weapon => {
+        let domObj = renderGameOption(weapon, optionsContainer);
+        if(weapon.active){
+            select(domObj);
+        }
+    });
+}
+
+/**
+ * Add listeners to main action objects
+ * Objects: start button, weapon choices
+ */
 const addListeners = () => {
     const startGameBtn = document.getElementById("startGame");
 
@@ -63,20 +87,9 @@ const addListeners = () => {
     })
 }
 
-const addAllWeapons = () => {
-        WeaponList.weapons.forEach(element => {
-            allWeapons.push(new Weapon(element.name, element.winAgainst, element.active))
-        });
-    
-        let optionsContainer = document.getElementById("allOptions");
-        allWeapons.forEach(weapon => {
-            let domObj = renderGameOption(weapon, optionsContainer);
-            if(weapon.active){
-                select(domObj);
-            }
-        });
-}
-
+/**
+ * Setup pre game screen for use
+ */
 const initializePreGame = () => {
     if(firstInitiation){
         addAllWeapons();
