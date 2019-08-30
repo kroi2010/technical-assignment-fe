@@ -59,17 +59,20 @@ const hide = (el) => {
     el.style.display = "none";
 }
 
-const clearDOM = (el) => {
-    el.innerHTML = "";
+const clearChoiceList = () => {
+    [...document.getElementById("choiceList")
+    .getElementsByClassName("choice")]
+    .filter(choice => choice.id!=="computerChoice")
+    .map(choice => choice.remove());
 }
 
 const showPreGameScreen = () => {
     let game = document.getElementById("game");
     let preGame = document.getElementById("preGame");
     let mainContainer = document.getElementById("gameContainer");
-    mainContainer.style.minHeight = preGame.clientHeight.toString()+"px";
     hide(game);
     preGame.style.display = "flex";
+    mainContainer.style.minHeight = preGame.clientHeight.toString()+"px";
 }
 
 const showGameScreen = () => {
@@ -95,38 +98,64 @@ const selectDeselect = (el) => {
     }
 }
 
-let timeoutIterator = 0;
+// const displayRound = (round) => {
+//     let roundNumberEl = document.getElementById("roundNumber");
+//     roundNumberEl.innerHTML = round;
+//     const delayTime = 800;
+//     delay(0)
+//     .then(() => {
+//         addClick(document.getElementById("roundContainer"));
+//         fadeInOut(document.getElementById("roundContainer"));})
+//     .then(() => delay(delayTime))
+//     .then(() => fadeInOut(document.getElementById("roundText")))
+//     .then(() => delay(delayTime))
+//     .then(() => fadeInOut(document.getElementById("roundText")))
+//     .then(() => delay(delayTime))
+//     .then(() => {
+//         removeClick(document.getElementById("roundContainer"));
+//         fadeInOut(document.getElementById("roundContainer"));})
+// }
 
-let timeoutArr = [
-    function(){fadeInOut(document.getElementById("roundContainer"))},
-    function(){fadeInOut(document.getElementById("roundText"))}, 
-    function(){fadeInOut(document.getElementById("roundText"))}, 
-    function(){fadeInOut(document.getElementById("roundContainer"))}
-];
-
-const setTimeoutChain = () => {
-    timeoutArr[timeoutIterator]();
-    timeoutIterator++;
-
-    if(timeoutIterator<timeoutArr.length){
-        setTimeout(() => {
-            setTimeoutChain();
-        }, 800);
-    }else{
-        timeoutIterator = 0;
-    }
-}
-
-const displayRound = (round) => {
+const fadeInRoundDisplay = (resolve, round) => {
     let roundNumberEl = document.getElementById("roundNumber");
     roundNumberEl.innerHTML = round;
-    setTimeoutChain();
+    const delayTime = 800;
+    delay(0)
+    .then(() => {
+        addClick(document.getElementById("roundContainer"));
+        fadeInOut(document.getElementById("roundContainer"));})
+    .then(() => delay(delayTime))
+    .then(() => fadeInOut(document.getElementById("roundText")))
+    .then(() => delay(1000))
+    .then(() => resolve());
 }
+
+const fadeOutRoundDisplay = (resolve) => {
+    const delayTime = 800;
+    delay(0)
+    .then(() => fadeInOut(document.getElementById("roundText")))
+    .then(() => delay(delayTime))
+    .then(() => {
+        removeClick(document.getElementById("roundContainer"));
+        fadeInOut(document.getElementById("roundContainer"));})
+    .then(() => delay(1000))
+    .then(() => resolve());
+}
+
 
 const colorRoundNumber = (number, result) => {
     let roundNumbers = [...document.getElementsByClassName("round")];
     roundNumbers[number-1].classList.add(result);
     roundNumbers[number-1].getElementsByTagName("span")[0].innerHTML = result;
+}
+
+const resetRoundNumbers = () => {
+    let roundNumbers = [...document.getElementsByClassName("round")];
+    for(let i=0; i<roundNumbers.length; i++){
+        let statusClass = [...roundNumbers[i].classList].find(cls => cls!=="round");
+        roundNumbers[i].classList.remove(statusClass);
+        roundNumbers[i].firstElementChild.innerHTML = "";
+    }
 }
 
 const showWinAnimation = (header, msg) => {
@@ -150,66 +179,70 @@ const hideWinAnimation = () => {
     removeClick(winAnimation);
 }
 
-const startThinking = (el) => {
-    addCls(el, "thinking");
-    let today = new Date();
-    let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    console.log("started thinking: "+time)
+const startThinking = () => {
+    let computerChoice = document.getElementById("computerChoice")
+    addCls(computerChoice, "thinking");
 }
 
-const stopThinking = (el) => {
-    removeCls(el, "thinking");
+const stopThinking = () => {
+    let computerChoice = document.getElementById("computerChoice");
+    removeCls(computerChoice, "thinking");
 }
 
-const displayComputerChoice = (el, value) => {
-    el.style.background = "transparent";
-    el.innerHTML = value;
+const displayComputerChoice = (value) => {
+    let computerChoice = document.getElementById("computerChoice").firstElementChild;
+    computerChoice.style.background = "transparent";
+    computerChoice.innerHTML = value;
 }
 
 const translateElementAgainst = (el, parent) => {
     let elementDistance = el.getBoundingClientRect().x;
-    let margin = getComputedStyle(el).marginLeft;
+    let margin = parseInt(getComputedStyle(el).marginLeft, 10);
     let parentDistance = parent.getBoundingClientRect().x;
-    let translateDistance = elementDistance - parentDistance + parseInt(margin, 10);
-
+    let translateDistance = elementDistance - parentDistance - margin;
     el.style.transform = "translateX(-"+translateDistance+"px)";
 }
 
-const showComputerChoice = (value) => {
-    let computerChoice = document.getElementById("computerChoice")
-    computerChoice.style.display = "block";
+const returnPosition = (el) => {
+    el.style.transform = "none";
+}
 
-    fadeIn(computerChoice);
-
-    delay(4000)
-    .then(() => startThinking(computerChoice))
-    .then(() => delay(2000))
-    .then(() => stopThinking(computerChoice))
-    .then(() => displayComputerChoice(computerChoice.firstElementChild, value))
-    .catch((error) => {
-        console.log(error)
-    });
+const showAnnouncement = (result) => {
+    let container = document.getElementById("announcement");
+    container.innerHTML = result;
+    fadeIn(container);
 }
 
 const hideComputerChoice = () => {
-    let computerChoice = document.getElementById("computerChoice")
-    console.log("hide computer choice");
-    hide(computerChoice)
+    let computerChoice = document.getElementById("computerChoice");
+    let computerChoiceText = computerChoice.firstElementChild;
+    computerChoiceText.style.background = "#ffffff";
+    computerChoiceText.innerHTML = "";
     fadeOut(computerChoice);
 }
 
-const showRoundOutcome = (selectedElement, computerValue) => {
-    let startOutcomeShowChain = new Promise((resolve) => {
-        translateElementAgainst(selectedElement, document.getElementById("choiceList"));
-        resolve(true);
-    })
-    startOutcomeShowChain
-    //.then(() => translateElementAgainst(selectedElement, document.getElementById("choiceList")))
-    .then(() => showComputerChoice(computerValue))
-    .then(() => hideComputerChoice());
-    // translateElementAgainst(selectedElement, document.getElementById("choiceList"));
-    // showComputerChoice(computerValue);
-    // setTimeout(hideComputerChoice(), 10000);
+const hideAnnouncement = () => {
+    fadeOut(document.getElementById("announcement"));
+}
+
+const showRoundOutcome = (resolve, selectedElement, computerValue, result, roundNumber) => {
+    delay(0)
+    .then(() => fadeOut(document.getElementById("message")))
+    .then(() => translateElementAgainst(selectedElement, document.getElementById("choiceList")))
+    .then(() => delay(1000))
+    .then(() => fadeIn(document.getElementById("computerChoice")))
+    .then(() => startThinking())
+    .then(() => delay(3000))
+    .then(() => stopThinking())
+    .then(() => delay(200))
+    .then(() => displayComputerChoice(computerValue))
+    .then(() => showAnnouncement(result))
+    .then(() => colorRoundNumber(roundNumber, result))
+    .then(() => delay(2000))
+    .then(() => resolve())
+    .catch((error) => {
+        console.log(error)
+    });
 }
 
 export {
@@ -221,10 +254,14 @@ export {
     select,
     deselect,
     selectDeselect,
-    clearDOM,
-    colorRoundNumber,
-    displayRound,
+    returnPosition,
+    clearChoiceList,
+    fadeInRoundDisplay,
+    fadeOutRoundDisplay,
     renderGameOption,
+    hideComputerChoice,
+    hideAnnouncement,
+    resetRoundNumbers,
     showPreGameScreen,
     showGameScreen,
     showRoundOutcome,

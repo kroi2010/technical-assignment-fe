@@ -1,10 +1,9 @@
 import {
     select,
     deselect,
-    displayRound,
+    fadeInRoundDisplay,
     renderGameOption,
-    showPreGameScreen,
-    showGameScreen} from "./renderUI";
+    showPreGameScreen} from "./renderUI";
 import {getRoundNumber, initializeGame} from "./game";
 import WeaponList from "../data/weapons.json";
 import Weapon from "./weapons";
@@ -16,14 +15,18 @@ const addListeners = () => {
     const startGameBtn = document.getElementById("startGame");
 
     startGameBtn.addEventListener("click", () => {
-        displayRound(getRoundNumber());
+        new Promise((resolve) => {
+            fadeInRoundDisplay(resolve, getRoundNumber());
+        }).then(() => {
+            initializeGame(activeWeapons);
+        });
         let activeWeapons = allWeapons.filter(weapon => {
             return weapon.active === true;
         });
 
         setTimeout(() => {
-            showGameScreen();
-            initializeGame(activeWeapons);
+            
+            
         }, 2000)
     });
 
