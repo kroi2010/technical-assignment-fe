@@ -1,5 +1,6 @@
 import {initializePreGame} from "./pregame";
-import {showWinAnimation, hideWinAnimation} from "./renderUI"
+import {resetGame} from "./game";
+import {showWinAnimation, hideWinAnimation} from "./renderUI";
 import {strings} from "../constants";
 
 let firstInitiation = true;
@@ -7,6 +8,7 @@ let firstInitiation = true;
 const addListeners = () => {
     const restartBtn = document.getElementById("restartGame");
     restartBtn.addEventListener("click", () => {
+        resetGame();   
         initializePreGame();
         hideWinAnimation();
     })

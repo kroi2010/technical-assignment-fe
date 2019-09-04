@@ -5,10 +5,15 @@ import {
     fadeOut,
     select,
     deselect,
-    clearDOM,
-    colorRoundNumber,
-    displayRound,
+    returnPosition,
+    clearChoiceList,
+    fadeInRoundDisplay,
+    fadeOutRoundDisplay,
+    hideComputerChoice,
+    hideAnnouncement,
+    resetRoundNumbers,
     renderGameOption,
+    showGameScreen,
     showRoundOutcome
 } from "./renderUI";
 import {strings} from "../constants";
@@ -18,6 +23,8 @@ let activeWeapons = [];
 let activeWeaponChoices  = []; // all weapons elements that were activated for game
 let roundNumber = 1;
 let roundResult = [];
+let autoChoiceMade = false;
+let firstInitiation = true;
 
 const createActiveWeapons = (activeWeaponObjects) => {
     activeWeapons = [...activeWeaponObjects]
@@ -52,7 +59,6 @@ const showResult = (selectedEl) => {
     let weaponName = [...selectedEl.classList].find(weaponClass => (weaponClass!=="selected" && weaponClass!=="choice"));
     let userChoice = activeWeapons.find(obj => obj.name === weaponName);
     let computerChoice = activeWeapons[randomChoice()];
-    showRoundOutcome(selectedEl, computerChoice.name);
     let result;
     if(userChoice.winAgainst.includes(computerChoice.name)){
         result = strings.won;
@@ -62,14 +68,31 @@ const showResult = (selectedEl) => {
         result = strings.tie;
     }
     roundResult.push(result);
-    colorRoundNumber(roundNumber, result);
 
-    roundNumber++;
-    /*
-    setTimeout(() => {
-        playRound();
-    }, 6000);
-    */
+    new Promise((resolve) => {
+        showRoundOutcome(resolve, selectedEl, computerChoice.name, result, roundNumber);
+    })
+    .then(() => roundNumber++)
+    .then(() => {
+        if(roundNumber<4){
+            return new Promise((resolve) => fadeInRoundDisplay(resolve, roundNumber))
+            .then(() => false);
+        }else{
+            return true;
+        }
+    })
+    .then((lastRound) => {
+        hideComputerChoice(); // hides opp - always need
+        hideAnnouncement();     // hides win message - always need
+        fadeIn(document.getElementById("message")); //brings back choose msg - always need
+        if(lastRound){
+            initializeWinAnimation(roundResult);    //start win animation
+        }else{
+            disableEnableChoices(); // enables click on choices - not needed in the last since choices will be detroyed
+            resetChoiceStyling();   //styling reset for choices - not needed in last one
+            startNewRound();    // not needed in last one
+        }
+    })
 }
 
 const autoPlaySelect = () => {
@@ -102,12 +125,13 @@ const disableEnableChoices = () => {
 }
 
 const resetChoiceStyling = () => {
-    activeWeaponChoices.forEach(weapon => {
-        fadeIn(weapon)
-        if(weapon.classList.contains("selected")){
-            deselect(weapon);
+    for(let i=0; i<activeWeaponChoices.length; i++){
+        fadeIn(activeWeaponChoices[i]);
+        if(activeWeaponChoices[i].classList.contains("selected")){
+            returnPosition(activeWeaponChoices[i]);
+            deselect(activeWeaponChoices[i]);
         }
-    })
+    }
 }
 
 const resetGame = () => {
@@ -115,33 +139,31 @@ const resetGame = () => {
     activeWeapons = [];
     activeWeaponChoices  = []; 
     roundResult = [];
-    clearDOM(document.getElementById("choiceList"));    
+    resetRoundNumbers();
+    clearChoiceList();    
 }
 
-const playRound = () => {
-    if(roundNumber>1 && roundNumber<4){
-        displayRound(roundNumber);
-
+const startNewRound = () => {
+    new Promise((resolve) => {
+        fadeOutRoundDisplay(resolve);
+    }).then(() => {
+        autoChoiceMade = false;
+        addClick(document.getElementById("autoPlay"));
+        addClick([...document.getElementById("autoPlay").parentElement.getElementsByTagName("label")].find(l => l.htmlFor==="autoPlay"));
         setTimeout(() => {
-            disableEnableChoices();
-            resetChoiceStyling();
-        }, 2000); // allow round animation to start
-    
-        setTimeout(() => {
-            if(document.getElementById("autoPlay").checked){
+            if(document.getElementById("autoPlay").checked && !autoChoiceMade){
+                autoChoiceMade = true;
                 autoPlaySelect();
             }
-        }, 5000); // giving user 3 ( + animation ) seconds in case he wants to switch to manual mode   
-    }else if(roundNumber>=4){
-        initializeWinAnimation(roundResult);
-        resetGame();
-    }
+        }, 3000); // giving user some time in case he wants to switch to manual mode
+    })
 }
 
 const initializeGame = (activeWeaponObjects) => {
+    showGameScreen();
     prepareObjects(activeWeaponObjects);
     addListeners();
-    playRound();
+    startNewRound();
 }
 
 const userMadeChoice = (el) => {
@@ -151,15 +173,22 @@ const userMadeChoice = (el) => {
 }
 
 const addListeners = () => {
-    const radioButton = document.getElementById("autoPlay");
-    radioButton.addEventListener("change", () => {
+    let radioButton = document.getElementById("autoPlay");
+
+    if(firstInitiation){
+        firstInitiation = false;
+        radioButton.addEventListener("change", () => {
         if(document.getElementById("autoPlay").checked){
+            autoChoiceMade = true;
             autoPlaySelect();
         }
     });
+    }
 
     activeWeaponChoices.forEach(el => {
         el.addEventListener("click", () => {
+            removeClick(radioButton);
+            removeClick([...radioButton.parentElement.getElementsByTagName("label")].find(l => l.htmlFor===radioButton.id));
             userMadeChoice(el);
         });
     })
@@ -168,5 +197,6 @@ const addListeners = () => {
 
 export {
     initializeGame, 
-    getRoundNumber
+    getRoundNumber,
+    resetGame
 };
